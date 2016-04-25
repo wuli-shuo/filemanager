@@ -14,6 +14,7 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	
 	private int resourceId;
 	
+	
 	public FileAdapter(Context context,int textViewResourceId,List<FileItem> objects){
 		super(context,textViewResourceId,objects);
 		resourceId = textViewResourceId;

@@ -1,13 +1,24 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     >
 
-    <ListView
+ 	<com.example.fileexplorer.util.Search
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content" 
+ 	    ></com.example.fileexplorer.util.Search>
+    
+ 	<include layout="@layout/memory_info"  />
+ 	
+   <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         />
+   
+    <include  layout="@layout/function_option"/>
 
-</RelativeLayout>
+</LinearLayout>
