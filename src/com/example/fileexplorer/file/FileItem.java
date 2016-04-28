@@ -1,8 +1,12 @@
 package com.example.fileexplorer.file;
 
+import android.widget.CheckBox;
+
 public class FileItem {
 	private String name;
 	private int imageId;
+	private boolean boxChecked;
+	private int boxVisible = CheckBox.INVISIBLE;
 	
 	
 	public String getName(){
@@ -13,11 +17,27 @@ public class FileItem {
 		return imageId;
 	}
 	
+	public boolean getboxChecked(){
+		return boxChecked;
+	}
+	
+	public int getboxVisible(){
+		return boxVisible;
+	}
+	
 	public void setName(String name){
 		this.name = name;
 	}
 	
 	public void setImageId(int imageId){
 		this.imageId = imageId;
+	}
+	
+	public void setboxChecked(boolean boxChecked){
+		this.boxChecked = boxChecked;
+	}
+	
+	public void setboxVisible(int boxVisible){
+		this.boxVisible = boxVisible;
 	}
 }

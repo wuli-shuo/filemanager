@@ -5,20 +5,41 @@
     android:orientation="vertical"
     >
 
+    <com.example.fileexplorer.util.Title
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content" 
+ 	    ></com.example.fileexplorer.util.Title>
+    
+    
  	<com.example.fileexplorer.util.Search
  	    android:layout_width="match_parent"
  	    android:layout_height="wrap_content" 
  	    ></com.example.fileexplorer.util.Search>
     
- 	<include layout="@layout/memory_info"  />
+ 	<TextView 
+ 	    android:id="@+id/fileselected_number"
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content" 
+ 	    android:text="已选中0项"
+ 	    android:textSize="15sp"
+ 	    android:gravity="center"
+ 	    android:visibility="gone"
+ 	    />
+ 	
  	
    <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:cacheColorHint="#FFF"
         />
    
-    <include  layout="@layout/function_option"/>
+    <com.example.fileexplorer.util.FunctionSelection
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content" 
+ 	    ></com.example.fileexplorer.util.FunctionSelection>
+    
+    <include layout="@layout/memory_info"  />
 
 </LinearLayout>
