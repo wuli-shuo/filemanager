@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    
     >
 
     <com.example.fileexplorer.util.Title
@@ -33,6 +34,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:cacheColorHint="#FFF"
+        
         />
    
     <com.example.fileexplorer.util.FunctionSelection
@@ -41,5 +43,6 @@
  	    ></com.example.fileexplorer.util.FunctionSelection>
     
     <include layout="@layout/memory_info"  />
+    
 
 </LinearLayout>

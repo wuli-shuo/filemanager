@@ -4,6 +4,7 @@ import android.widget.CheckBox;
 
 public class FileItem {
 	private String name;
+	private String filePath;
 	private int imageId;
 	private boolean boxChecked;
 	private int boxVisible = CheckBox.INVISIBLE;
@@ -25,6 +26,10 @@ public class FileItem {
 		return boxVisible;
 	}
 	
+	public String getfilePath(){
+		return filePath;
+	}
+	
 	public void setName(String name){
 		this.name = name;
 	}
@@ -40,4 +45,9 @@ public class FileItem {
 	public void setboxVisible(int boxVisible){
 		this.boxVisible = boxVisible;
 	}
+	
+	public void setfilePath(String filePath){
+		this.filePath = filePath;
+	}
+	
 }

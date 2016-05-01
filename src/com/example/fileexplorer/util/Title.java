@@ -20,7 +20,7 @@ public class Title extends LinearLayout{
 		LayoutInflater.from(context).inflate(R.layout.title,this);
 		TextView catalogFile = (TextView)findViewById(R.id.catalog_file);
 		TextView classifyFile = (TextView)findViewById(R.id.classify_file);
-		Button hideFunction = (Button)findViewById(R.id.hide_function);
+		Button hideFunction = (Button)findViewById(R.id.more_function);
 		catalogFile.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
 				Toast.makeText(getContext()," message", Toast.LENGTH_SHORT).show();
