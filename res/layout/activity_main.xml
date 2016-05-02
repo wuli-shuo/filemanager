@@ -12,10 +12,7 @@
  	    ></com.example.fileexplorer.util.Title>
     
     
- 	<com.example.fileexplorer.util.Search
- 	    android:layout_width="match_parent"
- 	    android:layout_height="wrap_content" 
- 	    ></com.example.fileexplorer.util.Search>
+ 	 <include layout="@layout/search_widget"  />
     
  	<TextView 
  	    android:id="@+id/fileselected_number"

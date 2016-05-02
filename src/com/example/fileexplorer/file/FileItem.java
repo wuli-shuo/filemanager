@@ -7,6 +7,7 @@ public class FileItem {
 	private String filePath;
 	private int imageId;
 	private boolean boxChecked;
+	private boolean passwordNeeded = false;   // «∑Ò–Ë“™√‹¬Î
 	private int boxVisible = CheckBox.INVISIBLE;
 	
 	
@@ -30,6 +31,10 @@ public class FileItem {
 		return filePath;
 	}
 	
+	public boolean getpasswordNeeded(){
+		return passwordNeeded;
+	}
+	
 	public void setName(String name){
 		this.name = name;
 	}
@@ -48,6 +53,10 @@ public class FileItem {
 	
 	public void setfilePath(String filePath){
 		this.filePath = filePath;
+	}
+	
+	public void setpasswordNeeded(boolean passwordNeeded){
+		this.passwordNeeded = passwordNeeded;
 	}
 	
 }
