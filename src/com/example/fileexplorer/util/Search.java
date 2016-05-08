@@ -85,7 +85,8 @@ public class Search extends LinearLayout{
 				while(iterator.hasNext()){
 					Map map = (Map)iterator.next();
 					String name = (String)map.get("name");
-					if(name.indexOf(keyword) > -1||name.indexOf(keyword.toUpperCase()) > -1){
+					String searchRange = name.substring(0,name.indexOf("."));
+					if(searchRange.indexOf(keyword) > -1||searchRange.indexOf(keyword.toUpperCase()) > -1){
 						 List<Map<String, String>> searchList = new ArrayList<Map<String, String>>(); 
 						 searchList.add(map);
 					}

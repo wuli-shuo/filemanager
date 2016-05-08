@@ -90,7 +90,7 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 				if(MainActivity.isMulChoice){
 					if(checkBox.isChecked()){
 						checkBox.setChecked(false);
-						fileSelected.remove(fileList.get(position).getName());
+						fileSelected.remove(fileList.get(position));
 					}else{
 						checkBox.setChecked(true);
 						fileSelected.add(fileList.get(position));
@@ -135,7 +135,7 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 				 		dialog.show();
 					}
 					else{
-						MainActivity.currentPath = MainActivity.currentPath + File.separator + fileList.get(position).getName() + File.separator;
+						MainActivity.currentPath = MainActivity.currentPath  + fileList.get(position).getName() + File.separator;
 						File file = new File(MainActivity.currentPath); 
 						//判断是否为文件夹
 						if (file.canRead() && file.canExecute() && file.isDirectory()){
@@ -146,10 +146,6 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 						else
 							openFile(file);
 					}
-					
-					
-					
-					
 				}
 			}
 		});
@@ -176,19 +172,34 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	     String fileName = file.getName();    
 	     String end = fileName.substring(fileName.indexOf(".") + 1).toLowerCase();    
           // 判断文件类型    
-	     if(end.equals("wma") || end.equals("mp3") || end.equals("midi")||end.equals("ape")     
-		   || end.equals("amr") || end.equals("ogg") || end.equals("wav")||end.equals("acc")) {    
+	     if(end.equals("wma")||end.equals("mp3")||end.equals("midi")||end.equals("ape")     
+		   || end.equals("amr")||end.equals("ogg")||end.equals("wav")||end.equals("acc")) {    
 	    	  type = "audio/*";     
-		 } else if (end.equals("3gp") || end.equals("mp4")||end.equals("rmvb")||end.equals("flv")  
+		 } else if (end.equals("3gp")||end.equals("mp4")||end.equals("rmvb")||end.equals("flv")  
        ||end.equals("avi")||end.equals("wmv")||end.equals("f4v")) {    
 	         type = "video/*";    
-	    } else if (end.equals("jpg") || end.equals("gif") || end.equals("png") || end.equals("jpeg") || end.equals("bmp")) {    
+	    } else if (end.equals("jpg")||end.equals("gif")||end.equals("png")||end.equals("jpeg")||end.equals("bmp")) {    
 	    	 type = "image/*";    
-	    } else if(end.equals("txt")){
+	    } else if(end.equals("txt")||end.equals("c")||end.equals("cpp")||end.equals("h")||end.equals("java")||end.equals("log")){
 	    	 type = "text/plain";
-	    }else{
-	    	 Toast.makeText(context, "not media file", Toast.LENGTH_LONG).show();  
-	    	 return null;  
+	    }else if(end.equals("apk")){
+	    	 type = "application/vnd.android.package-archive";	
+	    }else if(end.equals("doc")||end.equals("docx")){
+	    	 type = "application/msword";
+	    }else if(end.equals("pdf")){
+	    	 type = "application/pdf";
+	    }else if(end.equals("ppt")){
+	    	 type = "application/vnd.ms-powerpoint";
+	    }else if(end.equals("xls")){
+	    	 type = "application/vnd.ms-excel";
+	    }else if(end.equals("zip")){
+	    	 type = "application/zip";
+	    }
+	    else if(end.equals("htm")||end.equals("html")||end.equals("dhtml")){
+	    	 type = "text/html";
+	    }
+	    else{
+	    	 Toast.makeText(context, "not media file", Toast.LENGTH_LONG).show();    
 	    }    
 	   // MIME Type格式:"文件类型/文件扩展名"       
 	    return type;    

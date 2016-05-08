@@ -2,50 +2,127 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="#ffffff" >
+    
+       
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="16sp"
+        />
+    
+    <View 
+        android:layout_height="1dp" 
+        android:layout_width="match_parent" 
+        android:background="#90909090" 
+        
+        />
+    
     <TextView
         android:id="@+id/new_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:text="新建文件夹"
         />
+    
+ 	<View 
+        android:layout_height="1dp" 
+        android:layout_width="wrap_content" 
+        android:background="#90909090" 
+        android:layout_marginLeft="45dp"
+       	android:layout_marginRight="45dp"
+        />
+    
     
     <TextView
         android:id="@+id/sortup_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:text="排序（升序）"
         />
+    
+    <View 
+        android:layout_height="1dp" 
+        android:layout_width="wrap_content" 
+        android:background="#90909090" 
+        android:layout_marginLeft="45dp"
+       	android:layout_marginRight="45dp"
+        />
+    
     
     <TextView
         android:id="@+id/sortdown_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:text="排序（降序）"
+        />
+    
+    <View 
+        android:layout_height="1dp" 
+        android:layout_width="wrap_content" 
+        android:background="#90909090" 
+        android:layout_marginLeft="45dp"
+       	android:layout_marginRight="45dp"
         />
        
     <TextView
-        android:id="@+id/copy_file"
+        android:id="@+id/encrypt_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="16sp"
-        android:text="复制"
+        android:textSize="18sp"
+        android:text="加密"
+        />
+    
+     <View 
+        android:layout_height="1dp" 
+        android:layout_width="wrap_content" 
+        android:background="#90909090" 
+        android:layout_marginLeft="45dp"
+       	android:layout_marginRight="45dp"
         />
     
     <TextView
-        android:id="@+id/crop_file"
+        android:id="@+id/zip_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="16sp"
-        android:text="剪切"
+        android:textSize="18sp"
+        android:text="压缩"
+        />
+    
+     <View 
+        android:layout_height="1dp" 
+        android:layout_width="wrap_content" 
+        android:background="#90909090"
+		android:layout_marginLeft="45dp"
+       	android:layout_marginRight="45dp"
+        />
+    
+     <TextView
+        android:id="@+id/unzip_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:text="解压"
+        />
+     
+      <View 
+        android:layout_height="1dp" 
+        android:layout_width="wrap_content" 
+        android:background="#90909090" 
+        android:layout_marginLeft="45dp"
+       	android:layout_marginRight="45dp"
         />
     
     <TextView
@@ -53,8 +130,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:text="粘贴"
+        />
+    
+    <View 
+        android:layout_height="1dp" 
+        android:layout_width="wrap_content" 
+        android:background="#90909090" 
+        android:layout_marginLeft="45dp"
+       	android:layout_marginRight="45dp"
+        />
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="16sp"
         />
        
 

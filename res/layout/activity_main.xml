@@ -28,10 +28,11 @@
    <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:cacheColorHint="#FFF"
-        
+       	android:cacheColorHint="#FFF"
+       	android:divider="#D4D4D4"
+        android:dividerHeight="1px"
         />
    
     <com.example.fileexplorer.util.FunctionSelection

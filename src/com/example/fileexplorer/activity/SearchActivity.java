@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -32,6 +33,7 @@ public class SearchActivity extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.search_result);
 		
 		searchMessage = (EditText)findViewById(R.id.search_message);
@@ -49,7 +51,8 @@ public class SearchActivity extends Activity{
 				while(iterator.hasNext()){
 					Map map = (Map)iterator.next();
 					String name = (String)map.get("name");
-					if(name.indexOf(keyword) > -1||name.indexOf(keyword.toUpperCase()) > -1){
+					String searchRange = name.substring(0,name.indexOf("."));
+					if(searchRange.indexOf(keyword) > -1||searchRange.indexOf(keyword.toUpperCase()) > -1){
 						 searchList.add(map);
 						
 					}
@@ -62,6 +65,7 @@ public class SearchActivity extends Activity{
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Map map = searchList.get(position);
 				File file = new File((String) map.get("path")); 
+				Log.d("filePath",(String) map.get("path"));
 				FileAdapter.openFile(file);
 			}
 		});
