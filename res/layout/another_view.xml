@@ -1,62 +1,293 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
      >
+     
+    <com.example.fileexplorer.util.Title
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content" 
+ 	    ></com.example.fileexplorer.util.Title>
     
-    <TableRow>
-        <Button 
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
+    <View 
+        android:layout_height="1dp" 
+        android:layout_width="match_parent" 
+        android:background="#90909090" 
         
-        <Button 
-            android:id="@+id/button2"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
-        
-        <Button 
-            android:id="@+id/button3"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
-        
-        <Button 
-            android:id="@+id/button4"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
-        
-    </TableRow>
+        />
     
-    <TableRow>
-        <Button 
-            android:id="@+id/button5"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
-        
-        <Button 
-            android:id="@+id/button6"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
-        
-        <Button 
-            android:id="@+id/button7"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
-        
-        <Button 
-            android:id="@+id/button8"
-            android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-            />
-        
-    </TableRow>
+    <include layout="@layout/search_widget"  />
     
-
-</TableLayout>
+     <View 
+        android:layout_height="15dp" 
+        android:layout_width="match_parent" 
+        android:background="#ffffffff" 
+        
+        />
+     
+   	<LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+     > 
+        <ImageView 
+        android:id="@+id/type_word"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_word"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_ppt"
+         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_ppt"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_excel"
+         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_excel"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_pdf"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_pdf"
+        />
+        </LinearLayout>
+        
+        
+        
+        <LinearLayout 
+            android:layout_width="match_parent"
+    		android:layout_height="wrap_content"    
+            >
+             <TextView 
+            android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="Word"
+            />
+        
+         <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="Ppt"
+            />
+        
+         <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="Excel"
+            />
+        
+        <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="Pdf"
+            />
+            
+        </LinearLayout>
+       
+        
+        <View 
+        android:layout_height="15dp" 
+        android:layout_width="match_parent" 
+        android:background="#ffffffff" 
+        
+        />
+        
+        
+        
+        
+        <LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+     > 
+        <ImageView 
+        android:id="@+id/type_zip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_zip"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_file"
+         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_file"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_apk"
+         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_apk"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_gallery"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_gallery"
+        />
+        </LinearLayout>
+        
+        
+        
+         <LinearLayout 
+            android:layout_width="match_parent"
+    		android:layout_height="wrap_content"    
+            >
+             <TextView 
+            android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="Zip"
+            />
+        
+         <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="其他文档"
+            />
+        
+         <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="安装包"
+            />
+        
+        <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="图片"
+            />
+            
+        </LinearLayout>
+        
+        
+        
+         <View 
+        android:layout_height="15dp" 
+        android:layout_width="match_parent" 
+        android:background="#ffffffff" 
+        
+        />
+        
+         
+         
+     <LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+     > 
+        <ImageView 
+        android:id="@+id/type_music"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_music"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_video"
+         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_video"
+        />
+        
+        <ImageView 
+        android:id="@+id/type_other"
+         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/classify_other"
+        />
+        
+        <ImageView 
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        />
+        </LinearLayout>
+        
+        
+        
+         <LinearLayout 
+            android:layout_width="match_parent"
+    		android:layout_height="wrap_content"    
+            >
+             <TextView 
+            android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="音乐"
+            />
+        
+         <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="视频"
+            />
+        
+         <TextView 
+             android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+    		android:text="其他"
+            />
+        
+        <TextView 
+            android:layout_width="0dp"
+    		android:layout_height="wrap_content"
+    		android:layout_weight="1"
+    		android:gravity="center"
+            />
+            
+        </LinearLayout>
+         
+         
+        <View 
+        android:layout_height="0dp" 
+        android:layout_width="match_parent" 
+        android:layout_weight="1"
+        android:background="#ffffffff" 
+        
+        />  
+         
+        
+  
+    <include layout="@layout/memory_info"  />
+    
+</LinearLayout>

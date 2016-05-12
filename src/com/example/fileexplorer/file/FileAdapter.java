@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.fileexplorer.R;
 import com.example.fileexplorer.activity.MainActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,6 +33,8 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	private static Context context;
 	private List<FileItem> fileList;    //文件列表
 	public static List<FileItem> fileSelected = new ArrayList<FileItem>();   //被选择的文件名
+	private int tag = 0;  //标志符，用于判断文件是否已经解锁
+	
 	
 	
 	public FileAdapter(Context context,int textViewResourceId,List<FileItem> objects){
@@ -98,7 +101,9 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 				MainActivity.fileselectedNumber.setText("已选中"+fileSelected.size()+"项");
 				}
 				else{
-					if(file.getpasswordNeeded()){
+					final SharedPreferences pref = context.getSharedPreferences(file.getName(),context.MODE_PRIVATE);
+					String filePath = pref.getString("file","");
+					if(filePath.equals(file.getfilePath()) && tag == 0){
 						AlertDialog.Builder dialog = new AlertDialog.Builder(context);
 				 		dialog.setTitle("打开私密文件");
 				 		final View view = LayoutInflater.from(context).inflate(R.layout.defined_dialog, null); 
@@ -112,11 +117,10 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 								// TODO Auto-generated method stub
 								EditText editContent = (EditText)view.findViewById(R.id.edit_content);
 							    String input = editContent.getText().toString();
-							    if (!input.equals("")){
-							    	SharedPreferences pref = context.getSharedPreferences(file.getName(),context.MODE_PRIVATE);
+							    if (!input.equals("")){			    	
 									String password = pref.getString("password", "");
 									if(password.equals(input)){
-										file.setpasswordNeeded(false);
+										tag = 1;
 										Toast.makeText(context,"密码正确!",Toast.LENGTH_SHORT).show();
 									}					
 							    	else
@@ -134,11 +138,13 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 						});
 				 		dialog.show();
 					}
-					else{
-						MainActivity.currentPath = MainActivity.currentPath  + fileList.get(position).getName() + File.separator;
+					else if(!filePath.equals(file.getfilePath()) || tag == 1){
+						tag = 0;
+						MainActivity.currentPath = MainActivity.currentPath  + fileList.get(position).getName() ;
 						File file = new File(MainActivity.currentPath); 
 						//判断是否为文件夹
 						if (file.canRead() && file.canExecute() && file.isDirectory()){
+							MainActivity.currentPath =  MainActivity.currentPath + File.separator;
 							MainActivity.initView(MainActivity.currentPath);
 							FileAdapter adapter = new FileAdapter(context,R.layout.file_item,MainActivity.catalogIndex.get(MainActivity.catalogIndex.size()-1));
 							MainActivity.listView.setAdapter(adapter);
@@ -156,14 +162,16 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 
 	public static void openFile(File file){
 		 Intent intent = new Intent();    
-	     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);    
-	     intent.setAction(android.content.Intent.ACTION_VIEW);               
+		 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);    
+	     intent.setAction(android.content.Intent.ACTION_VIEW); 
 	      // 获取文件媒体类型    
-	     String type = getMIMEType(file);    
-	      if(type==null)  
+	     String type = getMIMEType(file);
+	     Log.d("start",type);
+	      if(type == null)  
 		        return;  
 	      intent.setDataAndType(Uri.fromFile(file), type);  
-	      context.startActivity(intent);    
+	      ((Activity) context).startActivityForResult(intent,1); 
+	     
 		}  
 	
 	 //获取文件类型

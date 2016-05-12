@@ -42,7 +42,7 @@ public class SearchActivity extends Activity{
 		searchList = new ArrayList<Map<String, String>>(); 
 		
 	
-		adapter = new SimpleAdapter(this,searchList,R.layout.search_list,new String[]{"name"},new int[]{R.id.search_file_name});
+		adapter = new SimpleAdapter(this,searchList,R.layout.search_list,new String[]{"name","path"},new int[]{R.id.search_file_name,R.id.search_file_path});
 		search.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
 				searchList.clear();

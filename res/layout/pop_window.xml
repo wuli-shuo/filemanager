@@ -66,22 +66,7 @@
         android:text="排序（降序）"
         />
     
-    <View 
-        android:layout_height="1dp" 
-        android:layout_width="wrap_content" 
-        android:background="#90909090" 
-        android:layout_marginLeft="45dp"
-       	android:layout_marginRight="45dp"
-        />
-       
-    <TextView
-        android:id="@+id/encrypt_file"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="18sp"
-        android:text="加密"
-        />
+    
     
      <View 
         android:layout_height="1dp" 
