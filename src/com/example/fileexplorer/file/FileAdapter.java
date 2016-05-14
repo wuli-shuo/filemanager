@@ -80,8 +80,6 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 		       for(int i=0;i<fileList.size();i++){
 		    	   fileList.get(i).setboxVisible(CheckBox.VISIBLE);
 		        }
-		       FileAdapter adapter = new FileAdapter(context,R.layout.file_item,fileList);
-		       MainActivity.listView.setAdapter(adapter);
 		       return true;
 	       }
 		
@@ -161,17 +159,17 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	
 
 	public static void openFile(File file){
-		 Intent intent = new Intent();    
+		 Intent intent = new Intent(); 
+		 Log.d("path",file.getAbsolutePath());
 		 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);    
 	     intent.setAction(android.content.Intent.ACTION_VIEW); 
 	      // 获取文件媒体类型    
 	     String type = getMIMEType(file);
-	     Log.d("start",type);
 	      if(type == null)  
 		        return;  
 	      intent.setDataAndType(Uri.fromFile(file), type);  
 	      ((Activity) context).startActivityForResult(intent,1); 
-	     
+	      MainActivity.currentPath = new File( MainActivity.currentPath).getParent() + File.separator;
 		}  
 	
 	 //获取文件类型
@@ -196,7 +194,7 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	    	 type = "application/msword";
 	    }else if(end.equals("pdf")){
 	    	 type = "application/pdf";
-	    }else if(end.equals("ppt")){
+	    }else if(end.equals("ppt")||end.equals("pptx")){
 	    	 type = "application/vnd.ms-powerpoint";
 	    }else if(end.equals("xls")){
 	    	 type = "application/vnd.ms-excel";
@@ -205,10 +203,10 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	    }
 	    else if(end.equals("htm")||end.equals("html")||end.equals("dhtml")){
 	    	 type = "text/html";
+	    }else{
+	    	type = "*/*";
 	    }
-	    else{
-	    	 Toast.makeText(context, "not media file", Toast.LENGTH_LONG).show();    
-	    }    
+	     
 	   // MIME Type格式:"文件类型/文件扩展名"       
 	    return type;    
 	 }  

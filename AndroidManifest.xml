@@ -22,6 +22,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.example.fileexplorer.activity.MainActivity"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustUnspecified|stateHidden"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,7 +37,13 @@
         </activity>
         
         <activity
-            android:name="com.example.fileexplorer.activity.AnotherActivity" >
+            android:name="com.example.fileexplorer.activity.AnotherActivity" 
+             >   
+        </activity>
+        
+         <activity
+            android:name="com.example.fileexplorer.activity.SameTypeActivity" 
+             >   
         </activity>
     </application>
 

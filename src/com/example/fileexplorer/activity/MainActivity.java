@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.example.fileexplorer.R;
+import com.example.fileexplorer.database.FileDB;
+import com.example.fileexplorer.database.FileOpenHelper;
 import com.example.fileexplorer.file.FileAdapter;
 import com.example.fileexplorer.file.FileItem;
 import com.example.fileexplorer.util.MemoryCaculation;
@@ -21,9 +23,13 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,6 +50,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
@@ -57,13 +64,13 @@ public class MainActivity extends Activity implements OnClickListener{
 	
 	public static List<FileItem> fileList ;
 	public static List<List> catalogIndex = new ArrayList<List>();
-	private String rootPath ="mnt" + File.separator + "sdcard" + File.separator;
+	public static  String rootPath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
 	public static MemoryCaculation memoryCaculation = new MemoryCaculation();
 	public static boolean isMulChoice = false;  //是否多选
 	public static TableLayout optionLayout;  //文件操作功能框架
 	public static TextView fileselectedNumber;    //显示选中的数量
 	public static ListView listView;     //文件列表
-	public static String currentPath  ="mnt" + File.separator + "sdcard" + File.separator;
+	public static String currentPath ;
 	public static File[] files;
 	public static File[] totalFile;    //用于另一进程，防止与前一个File[]冲突
 	public static List< Map<String, String> > totalFileList = new ArrayList< Map<String, String> >();
@@ -71,6 +78,11 @@ public class MainActivity extends Activity implements OnClickListener{
 	public PopupWindow popupWindow;
 	public int flag = 0;   //用于在粘贴前一操作是复制还是剪切
 	public int mark = 0;   //用于在Back前判断关闭文件
+	public  FileOpenHelper dbHelper = new FileOpenHelper(this,"File.db",null,1);
+	public static SQLiteDatabase db;
+	public static int progress = 0;
+
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,9 +94,56 @@ public class MainActivity extends Activity implements OnClickListener{
 		TextView classifyFile = (TextView)findViewById(R.id.classify_file);
 		classifyFile.setTextColor(0xFF000000);
 		
-		new Thread(new Runnable(){
+		currentPath= Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
+		
+		db = dbHelper.getWritableDatabase();
+		Cursor myCursor = db.rawQuery("select * from File", null);
+		if(myCursor.getCount() == 0){
+			new Thread(new Runnable(){
+				public void run(){
+					
+					db.beginTransaction();
+					try{
+						saveFile(rootPath);
+						db.setTransactionSuccessful();   //事务已经执行成功
+					}catch(Exception e){
+						e.printStackTrace();
+					}finally{
+						progress = 1;
+						db.endTransaction();
+					}
+			}
+		}).start();
+	}else{
+		progress = 1;
+	}
+	
+		
+		Intent intent = new Intent("com.example.fileexplorer.activity.PROGRESS");
+		sendBroadcast(intent);
+		Log.d("send","ok");
+		Log.d("currentpath",currentPath);
+		
+		
+	new Thread(new Runnable(){
 			public void run(){
-				getTotalFile(rootPath);
+			/*	db = dbHelper.getWritableDatabase();
+				saveFile(rootPath);
+				progress = 1;
+				db = dbHelper.getWritableDatabase();
+				db.beginTransaction();
+				try{
+					saveFile(rootPath);
+				}catch(Exception e){
+					e.printStackTrace();
+				}finally{
+					progress = 1;
+					db.endTransaction();
+				}*/
+				
+				
+				
+				/*getTotalFile(rootPath);
 				for(int i = 0 ; i < totalFileList.size()-1 ; i++ ) {  //去除重复项
 					for(int j = totalFileList.size()-1 ; j > i; j-- ) {
 						if ( (totalFileList.get(j).get("name")).equals((totalFileList.get(i)).get("name")) 
@@ -92,16 +151,15 @@ public class MainActivity extends Activity implements OnClickListener{
 							totalFileList.remove(j);
 				       }
 				     }
-				 }
+				 }*/
 			}
 		}).start();
-		
-		
+	
 		
 		
 		//显示文件列表
 		initView(currentPath);
-		FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,fileList);
+		FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
 		listView = (ListView)findViewById(R.id.list_view);
 		listView.setAdapter(adapter);
 		
@@ -160,6 +218,26 @@ public class MainActivity extends Activity implements OnClickListener{
 	}
 	
 	
+	public void saveFile(String path){
+		File[] totalFile = new File(path).listFiles();
+		if(totalFile == null)
+			return ;
+		for(File file : totalFile){
+			ContentValues values = new ContentValues();
+			if(file.isFile()){
+				values.put("name", file.getName());  
+				values.put("path", file.getParentFile().getAbsolutePath());  
+				values.put("type",file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase());
+				db.insert("File", null, values);
+			}
+			if(file.isDirectory()){     //如果是文件夹，递归查找
+				saveFile(file.getAbsolutePath());
+			}
+			
+		}
+	}
+	
+	
 	public void getTotalFile(String path){
 		totalFile = new File(path).listFiles();
 		if(totalFile == null)
@@ -169,18 +247,20 @@ public class MainActivity extends Activity implements OnClickListener{
 			if(file.isFile()){
 				 map.put("name", file.getName());  
 				 map.put("path", file.getAbsolutePath()); 
+				 Log.d("map",file.getName());
 				 totalFileList.add(map); 
 			}
 			if(file.isDirectory()){     //如果是文件夹，递归查找
-				getTotalFile(file.getPath());
+				getTotalFile(file.getAbsolutePath());
 			}
 			
 		}
+		
 	}
 	
 	
 	public static void initView(String filePath){
-			fileList = new ArrayList<FileItem>();
+			List<FileItem> list = new ArrayList<FileItem>();
 			File folder =new File(filePath);
 			files = folder.listFiles();
 			String fileType = "image/*";
@@ -193,40 +273,54 @@ public class MainActivity extends Activity implements OnClickListener{
 					fileItem.setImageId(R.drawable.file);
 				}else if(file.isFile()){
 					fileType = FileAdapter.getMIMEType(file);
-					fileItem.setImageId(galleryChoose(fileType));
+					if(fileType.equals("audio/*")){
+						fileItem.setImageId(R.drawable.music);
+					}else if(fileType.equals("video/*")){
+						fileItem.setImageId(R.drawable.video);
+					}else if(fileType.equals("image/*")){
+						fileItem.setImageId(R.drawable.gallery);
+					}else if(fileType.equals("text/plain")){
+						fileItem.setImageId(R.drawable.text);
+					}else if(fileType.equals("application/vnd.android.package-archive")){
+						fileItem.setImageId(R.drawable.apk);
+					}else if(fileType.equals("application/msword")){
+						fileItem.setImageId(R.drawable.word);
+					}else if(fileType.equals("application/vnd.ms-powerpoint")){
+						fileItem.setImageId(R.drawable.ppt);
+					}else if(fileType.equals("application/pdf")){
+						fileItem.setImageId(R.drawable.pdf);
+					}else if(fileType.equals("application/vnd.ms-excel")){
+						fileItem.setImageId(R.drawable.excel);
+					}else if(fileType.equals("application/zip")){
+						fileItem.setImageId(R.drawable.zip);
+					}
+					else if(fileType.equals("*/*")){
+						fileItem.setImageId(R.drawable.unknown);
+					}	
 				}
-				fileList.add(fileItem);	
+				list.add(fileItem);	
 			}
-			catalogIndex.add(fileList);
+			catalogIndex.add(list);
+			fileList = list;
 	}
 	
 	
-	public static int galleryChoose(String fileType){
-		if(fileType.equals("audio/*")){
-			return R.drawable.music;
-		}else if(fileType.equals("video/*")){
-			return R.drawable.video;
-		}else if(fileType.equals("image/*")){
-			return R.drawable.gallery;
-		}else if(fileType.equals("text/plain")){
-			return R.drawable.text;
-		}else if(fileType.equals("application/vnd.android.package-archive")){
-			return R.drawable.apk;
-		}else if(fileType.equals("application/msword")){
-			return R.drawable.word;
-		}else if(fileType.equals("application/vnd.ms-powerpoint")){
-			return R.drawable.ppt;
-		}else if(fileType.equals("application/pdf")){
-			return R.drawable.pdf;
-		}else if(fileType.equals("application/vnd.ms-excel")){
-			return R.drawable.excel;
-		}else if(fileType.equals("application/zip")){
-			return R.drawable.zip;
+	/*public static void initView(String filePath){
+		List<FileItem> list = new ArrayList<FileItem>();
+		File folder =new File(filePath);
+		files = folder.listFiles();
+		for(File file : files){
+			FileItem fileItem = new FileItem();
+			fileItem.setName(file.getName());
+			fileItem.setfilePath(file.getAbsolutePath());
+			fileItem.setImageId(R.drawable.file);
+			fileItem.setImageId(R.drawable.file);
+			list.add(fileItem);	
 		}
-		else{
-			return R.drawable.unknown;
-		}
-	}
+		catalogIndex.add(list);
+		fileList = list;
+	}*/
+	
 	
 	
 	
@@ -260,8 +354,11 @@ public class MainActivity extends Activity implements OnClickListener{
 					    	Toast.makeText(MainActivity.this, "不能同时命名文件", Toast.LENGTH_SHORT).show();
 					    }   
 						FileAdapter.fileSelected.clear();
-						FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
-					    listView.setAdapter(adapter);
+						optionLayout.setVisibility(View.INVISIBLE);
+				    	fileselectedNumber.setVisibility(View.INVISIBLE);
+					    for(int i=0;i<fileList.size();i++){
+					    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
+					    }
 					    optionLayout.setVisibility(View.GONE);
 					    fileselectedNumber.setVisibility(View.GONE);
 					}
@@ -300,8 +397,11 @@ public class MainActivity extends Activity implements OnClickListener{
 						  	}   
 						} 	
 						FileAdapter.fileSelected.clear();
-						FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
-					    listView.setAdapter(adapter);
+						optionLayout.setVisibility(View.INVISIBLE);
+				    	fileselectedNumber.setVisibility(View.INVISIBLE);
+					    for(int i=0;i<fileList.size();i++){
+					    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
+					    }
 					    optionLayout.setVisibility(View.GONE);
 					    fileselectedNumber.setVisibility(View.GONE);
 					}
@@ -447,7 +547,32 @@ public class MainActivity extends Activity implements OnClickListener{
 					copyFile(fileSelected.getfilePath(),currentPath +  (fileSelected.getName()).toString());
 					FileItem fileItem = new FileItem();
 					String fileType = FileAdapter.getMIMEType(new File(fileSelected.getfilePath()));
-					fileItem.setImageId(galleryChoose(fileType));
+						fileType = FileAdapter.getMIMEType(new File(fileSelected.getfilePath()));
+						if(fileType.equals("audio/*")){
+							fileItem.setImageId(R.drawable.music);
+						}else if(fileType.equals("video/*")){
+							fileItem.setImageId(R.drawable.video);
+						}else if(fileType.equals("image/*")){
+							fileItem.setImageId(R.drawable.gallery);
+						}else if(fileType.equals("text/plain")){
+							fileItem.setImageId(R.drawable.text);
+						}else if(fileType.equals("application/vnd.android.package-archive")){
+							fileItem.setImageId(R.drawable.apk);
+						}else if(fileType.equals("application/msword")){
+							fileItem.setImageId(R.drawable.word);
+						}else if(fileType.equals("application/vnd.ms-powerpoint")){
+							fileItem.setImageId(R.drawable.ppt);
+						}else if(fileType.equals("application/pdf")){
+							fileItem.setImageId(R.drawable.pdf);
+						}else if(fileType.equals("application/vnd.ms-excel")){
+							fileItem.setImageId(R.drawable.excel);
+						}else if(fileType.equals("application/zip")){
+							fileItem.setImageId(R.drawable.zip);
+						}
+						else if(fileType.equals("*/*")){
+							fileItem.setImageId(R.drawable.unknown);
+						}	
+					
 					fileItem.setName(fileSelected.getName());
 					fileList.add(fileItem);	
 				}		
@@ -542,7 +667,7 @@ public class MainActivity extends Activity implements OnClickListener{
 					fileItem.setImageId(R.drawable.file);
 					fileItem.setName(fileName);
 					fileItem.setfilePath(FileAdapter.fileSelected.get(0).getfilePath());
-					fileList.add(fileItem);
+					fileList.add(0,fileItem);
 					FileAdapter.fileSelected.clear();
 					FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
 				    listView.setAdapter(adapter);
@@ -591,8 +716,11 @@ public class MainActivity extends Activity implements OnClickListener{
 				    	Toast.makeText(MainActivity.this,"密码不能为空!",Toast.LENGTH_SHORT).show();
 				    }
 					FileAdapter.fileSelected.clear();
-					FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
-				    listView.setAdapter(adapter);
+					optionLayout.setVisibility(View.INVISIBLE);
+			    	fileselectedNumber.setVisibility(View.INVISIBLE);
+				    for(int i=0;i<fileList.size();i++){
+				    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
+				    }
 				    optionLayout.setVisibility(View.GONE);
 				    fileselectedNumber.setVisibility(View.GONE);
 				}
@@ -796,6 +924,7 @@ public class MainActivity extends Activity implements OnClickListener{
 			 mark = 0;
 		 }
 		 else{*/
+		 	
 			 if(catalogIndex.size() > 1){
 				 isMulChoice = false;
 				 optionLayout.setVisibility(View.GONE);
@@ -805,11 +934,16 @@ public class MainActivity extends Activity implements OnClickListener{
 				 FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,fileList);
 				 listView = (ListView)findViewById(R.id.list_view);
 				 listView.setAdapter(adapter);
+				 Log.d("Back",currentPath);
 				 currentPath = new File(currentPath).getParent() + File.separator;
 				 File folder =new File(currentPath);
 			 	 files = folder.listFiles(); 
-			 }else if(catalogIndex.size() == 1)
+			 	
+			 }else if(catalogIndex.size() == 1){
+				 catalogIndex.clear();
 				 finish();
+			 }
+				 
 		 
 		
 		 
