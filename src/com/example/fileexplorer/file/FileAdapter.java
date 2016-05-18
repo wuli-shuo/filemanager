@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,8 +94,15 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 						checkBox.setChecked(false);
 						fileSelected.remove(fileList.get(position));
 					}else{
-						checkBox.setChecked(true);
-						fileSelected.add(fileList.get(position));
+						SharedPreferences preferences = context.getSharedPreferences(file.getName(),context.MODE_PRIVATE);
+						String path = preferences.getString("file","");
+						if(path.equals(file.getfilePath())){
+							Toast.makeText(context,"加密文件，不可修改",Toast.LENGTH_SHORT).show();
+						}else{
+							checkBox.setChecked(true);
+							fileSelected.add(fileList.get(position));
+						}
+						
 					}
 				MainActivity.fileselectedNumber.setText("已选中"+fileSelected.size()+"项");
 				}
@@ -107,14 +115,15 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 				 		final View view = LayoutInflater.from(context).inflate(R.layout.defined_dialog, null); 
 				 		TextView editTip = (TextView)view.findViewById(R.id.edit_tip);
 				 		editTip.setText("请输入密码");
+				 		final EditText editContent2 = (EditText)view.findViewById(R.id.edit_content);
+				 		editContent2.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
 				 		dialog.setView(view);
 				 		dialog.setCancelable(false);
 				 		dialog.setPositiveButton("确定",new DialogInterface.OnClickListener() {
 							
 							public void onClick(DialogInterface dialog, int which) {
 								// TODO Auto-generated method stub
-								EditText editContent = (EditText)view.findViewById(R.id.edit_content);
-							    String input = editContent.getText().toString();
+							    String input = editContent2.getText().toString();
 							    if (!input.equals("")){			    	
 									String password = pref.getString("password", "");
 									if(password.equals(input)){
@@ -160,7 +169,7 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 
 	public static void openFile(File file){
 		 Intent intent = new Intent(); 
-		 Log.d("path",file.getAbsolutePath());
+		 Log.e("path",file.getAbsolutePath());
 		 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);    
 	     intent.setAction(android.content.Intent.ACTION_VIEW); 
 	      // 获取文件媒体类型    
@@ -176,7 +185,7 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	 public static String getMIMEType(File file) {    
 	     String type = "";    
 	     String fileName = file.getName();    
-	     String end = fileName.substring(fileName.indexOf(".") + 1).toLowerCase();    
+	     String end = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();    
           // 判断文件类型    
 	     if(end.equals("wma")||end.equals("mp3")||end.equals("midi")||end.equals("ape")     
 		   || end.equals("amr")||end.equals("ogg")||end.equals("wav")||end.equals("acc")) {    
@@ -196,12 +205,11 @@ public class FileAdapter extends ArrayAdapter<FileItem>{
 	    	 type = "application/pdf";
 	    }else if(end.equals("ppt")||end.equals("pptx")){
 	    	 type = "application/vnd.ms-powerpoint";
-	    }else if(end.equals("xls")){
+	    }else if(end.equals("xls")||end.equals("xlsx")){
 	    	 type = "application/vnd.ms-excel";
 	    }else if(end.equals("zip")){
 	    	 type = "application/zip";
-	    }
-	    else if(end.equals("htm")||end.equals("html")||end.equals("dhtml")){
+	    }else if(end.equals("htm")||end.equals("html")||end.equals("dhtml")){
 	    	 type = "text/html";
 	    }else{
 	    	type = "*/*";

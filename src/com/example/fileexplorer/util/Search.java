@@ -79,7 +79,7 @@ public class Search extends LinearLayout{
 		EditText searchMessage = (EditText)findViewById(R.id.search_message);
 		Button search = (Button)findViewById(R.id.search);
 		final String keyword = searchMessage.getText().toString();
-		search.setOnClickListener(new OnClickListener(){
+	/*	search.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
 				Iterator iterator = MainActivity.totalFileList.iterator();
 				while(iterator.hasNext()){
@@ -93,7 +93,7 @@ public class Search extends LinearLayout{
 				}
 				Toast.makeText(getContext()," message", Toast.LENGTH_SHORT).show();
 			}
-		});
+		});*/
 	}
 	
 	

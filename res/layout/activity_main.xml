@@ -2,14 +2,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    
+    android:orientation="vertical"  
     >
+    
+
 
     <com.example.fileexplorer.util.Title
  	    android:layout_width="match_parent"
  	    android:layout_height="wrap_content" 
  	    ></com.example.fileexplorer.util.Title>
+    
+     
     
     <View 
         android:layout_height="1dp" 
@@ -29,8 +32,7 @@
  	    android:textSize="15sp"
  	    android:gravity="center"
  	    android:visibility="gone"
- 	    />
- 	
+ 	    /> 
  	
    <ListView
         android:id="@+id/list_view"
@@ -42,6 +44,8 @@
         android:dividerHeight="1px"
         />
    
+   
+   
     <com.example.fileexplorer.util.FunctionSelection
  	    android:layout_width="match_parent"
  	    android:layout_height="wrap_content" 
@@ -49,5 +53,6 @@
     
     <include layout="@layout/memory_info"  />
     
-
+	
+    
 </LinearLayout>

@@ -3,10 +3,14 @@ package com.example.fileexplorer.file;
 import java.io.File;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,13 +98,30 @@ public class FileTypeAdapter extends ArrayAdapter<FileItem>{
 				else if(!filePath.equals(file.getfilePath()) || tag == 1){
 					tag = 0;
 					File file = new File(fileList.get(position).getfilePath()); 
-					FileAdapter.openFile(file);
+					openTypeFile(file);
 				}
 		}
 	});
 
 	return view;
 	}
+	
+	
+	
+	public void openTypeFile(File file){
+		 Intent intent = new Intent(); 
+		 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);    
+	     intent.setAction(android.content.Intent.ACTION_VIEW); 
+	      // 获取文件媒体类型    
+	     String type = FileAdapter.getMIMEType(file);
+	      if(type == null)  
+		        return;  
+	      intent.setDataAndType(Uri.fromFile(file), type);  
+	      context.startActivity(intent);
+		}  
+	
+	
+	
 	
 	
 }

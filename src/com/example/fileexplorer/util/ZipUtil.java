@@ -14,6 +14,8 @@ import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipFile;  
 import org.apache.tools.zip.ZipOutputStream; 
 
+import android.util.Log;
+
 
 public class ZipUtil {
 	/** 
@@ -26,7 +28,13 @@ public class ZipUtil {
      * @throws Exception 
      */  
    public static void zipFile(String baseDir, String fileName)throws Exception {  
-	     List<File> fileList = getSubFiles(new File(baseDir));  
+	     List<File>  fileList;
+	     if(new File(baseDir).isDirectory()){
+	    	 fileList = getSubFiles(new File(baseDir));
+	     }else{
+	    	 fileList = new ArrayList<File>(); 
+	    	 fileList.add(new File(baseDir)); 
+	     }   	 
          ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(fileName));  
          zos.setEncoding("UTF-8");//设置编码,解决中文乱码的问题  
          ZipEntry ze = null;  
@@ -45,9 +53,10 @@ public class ZipUtil {
 	              zos.write(buf, 0, readLen);  
              }  
 	         is.close();  
-       }  
-      zos.closeEntry();  
-      zos.close();  
+       }
+      zos.flush();
+      zos.closeEntry(); 
+      zos.close(); 
 	  }  
 	
 	   /** 

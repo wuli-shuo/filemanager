@@ -11,7 +11,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -96,21 +98,32 @@ public class SearchActivity extends Activity{
 				
 				
 				if(MainActivity.progress == 1){
-					Cursor cursor = MainActivity.db.query("File",null,null,null,null,null,null);
-					if(cursor.moveToFirst()){
-						do{
-							String name = cursor.getString(cursor.getColumnIndex("name"));
-							String path = cursor.getString(cursor.getColumnIndex("path"));
-							if(name.indexOf(keyword) > -1||name.indexOf(keyword.toUpperCase()) > -1){
-								 Map<String, String> map = new HashMap<String, String>(); 
-								 map.put("name", name);  
-			    				 map.put("path", path); 
-								 searchList.add(map);
-							}
-						}while(cursor.moveToNext());					
+					if(TextUtils.isEmpty(keyword)){
+						Toast.makeText(SearchActivity.this,"请输入搜索关键字",Toast.LENGTH_SHORT).show();
+					}else{
+						Cursor cursor = MainActivity.db.query("File",null,null,null,null,null,null);
+						if(cursor.moveToFirst()){
+							do{
+								String name = cursor.getString(cursor.getColumnIndex("name"));
+								String path = cursor.getString(cursor.getColumnIndex("path"));
+								if(name.indexOf(keyword) > -1||name.indexOf(keyword.toUpperCase()) > -1){
+									 Map<String, String> map = new HashMap<String, String>(); 
+									 map.put("name", name);  
+				    				 map.put("path", path); 
+									 searchList.add(map);
+								}
+							}while(cursor.moveToNext());					
+						}
+						cursor.close();
+						if(searchList.size() == 0){
+							 Map<String, String> map = new HashMap<String, String>(); 
+							 map.put("name","     没有找到相关文件...");  
+		    				 map.put("path", ""); 
+							 searchList.add(map);
+						}
+						searchResult.setAdapter(adapter);
 					}
-					cursor.close();
-					searchResult.setAdapter(adapter);
+					
 				}else{
 					progressDialog.setTitle("正在加载中....");
 					progressDialog.setMessage("请稍等");
@@ -129,8 +142,8 @@ public class SearchActivity extends Activity{
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Map map = searchList.get(position);
 				File file = new File((String) map.get("path")); 
-				Log.d("filePath",(String) map.get("path"));
-				FileAdapter.openFile(file);
+				Log.e("filePath",(String) map.get("path"));
+				openTargetFile(file);
 			}
 		});
 	
@@ -162,7 +175,18 @@ public class SearchActivity extends Activity{
 	
 	
 	
-	
+	public void openTargetFile(File file){
+		 Intent intent = new Intent(); 
+		 Log.e("searchpath",file.getAbsolutePath());
+		 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);    
+	     intent.setAction(android.content.Intent.ACTION_VIEW); 
+	      // 获取文件媒体类型    
+	     String type = FileAdapter.getMIMEType(file);
+	      if(type == null)  
+		        return;  
+	      intent.setDataAndType(Uri.fromFile(file), type);  
+	      startActivity(intent); 
+		}  
 	
 	
 	
