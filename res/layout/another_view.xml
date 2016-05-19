@@ -6,10 +6,7 @@
     android:orientation="vertical"
      >
      
-    <com.example.fileexplorer.util.Title
- 	    android:layout_width="match_parent"
- 	    android:layout_height="wrap_content" 
- 	    ></com.example.fileexplorer.util.Title>
+    <include layout="@layout/title"  />
     
     <View 
         android:layout_height="1dp" 

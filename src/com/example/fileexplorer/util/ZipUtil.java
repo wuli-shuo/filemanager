@@ -9,34 +9,26 @@ import java.io.InputStream;
 import java.util.ArrayList;  
 import java.util.Enumeration;  
 import java.util.List;  
-  
 import org.apache.tools.zip.ZipEntry;  
 import org.apache.tools.zip.ZipFile;  
 import org.apache.tools.zip.ZipOutputStream; 
 
-import android.util.Log;
 
 
 public class ZipUtil {
-	/** 
-     * 压缩文件(包括子目录) 
-     *  
-     * @param baseDir 
-     *            要压缩的文件夹(物理路径) 
-     * @param fileName 
-     *            保存的文件名称(物理文件路径) 
-     * @throws Exception 
+	/*
+     * 压缩文件(包括子目录)   
      */  
    public static void zipFile(String baseDir, String fileName)throws Exception {  
 	     List<File>  fileList;
-	     if(new File(baseDir).isDirectory()){
-	    	 fileList = getSubFiles(new File(baseDir));
+	     if(new File(baseDir).isDirectory()){  //文件夹，得出文件夹下的总文件
+	    	 fileList = getSubFiles(new File(baseDir));  
 	     }else{
 	    	 fileList = new ArrayList<File>(); 
 	    	 fileList.add(new File(baseDir)); 
 	     }   	 
          ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(fileName));  
-         zos.setEncoding("UTF-8");//设置编码,解决中文乱码的问题  
+         zos.setEncoding("UTF-8"); //设置编码,解决中文乱码的问题  
          ZipEntry ze = null;  
          byte[] buf = new byte[1024];  
          int readLen = 0;  
@@ -59,14 +51,8 @@ public class ZipUtil {
       zos.close(); 
 	  }  
 	
-	   /** 
-        * 给定根目录，返回另一个文件名的相对路径，用于zip文件中的路径. 
-	    *  
-        * @param baseDir 
-        *            java.lang.String 根目录 
-        * @param realFileName 
-        *            java.io.File 实际的文件名 
-        * @return 相对文件名 
+	   /*
+        * 给定根目录，返回另一个文件名的相对路径，用于zip文件中的路径. 保证绝对路径发生变化还能解压
         */  
        private static String getAbsFileName(String baseDir, File realFileName) {  
     	   File real = realFileName;  
@@ -84,12 +70,8 @@ public class ZipUtil {
 	       return ret;  
 	   }  
  
-       /** 
-	    * 取得指定目录下的所有文件列表，包括子目录. 
-	    *  
-	    * @param baseDir 
-	    *            File 指定的目录 
-	    * @return 包含java.io.File的List 
+       /*
+	    * 取得指定目录下的所有文件列表，包括子目录.
 	    */  
 	    private static List<File> getSubFiles(File baseDir) {  
 	       List<File> ret = new ArrayList<File>();  
@@ -105,11 +87,8 @@ public class ZipUtil {
 	       return ret;  
 	   }  
   
-	   /** 
-	    * 解压缩功能. 将ZIP_FILENAME文件解压到ZIP_DIR目录下. 
-	    * @param zipFileName ZIP文件物理路径 
-	    * @param zipDir 
-	    * @throws Exception 
+	   /*
+	    * 解压缩功能. 将ZIP_FILENAME文件解压到ZIP_DIR目录下.
 	    */  
 	    @SuppressWarnings("unchecked")  
 	    public static void unZipFile(String zipFileName, String zipDir)throws Exception {  
@@ -148,14 +127,5 @@ public class ZipUtil {
         	}  
         	zip.close();  
 	    }  
-	    
-	  /*  public static void main(String[] args) {  
-	    	try {  
-	    		// ZipToFile.zipFile("E:\\工作周报", "E:\\工作周报.zip");  
-	    		ZipUtil.unZipFile("E:\\工作周报.zip", "E:\\工作周报2");  
-        		} catch (Exception e) {  
-        			e.printStackTrace();  
-        		}  
-	    }  */
 }  
 

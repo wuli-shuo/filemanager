@@ -3,11 +3,11 @@ package com.example.fileexplorer.file;
 import android.widget.CheckBox;
 
 public class FileItem {
-	private String name;
-	private String filePath;
-	private int imageId;
-	private boolean boxChecked;
-	private int boxVisible = CheckBox.INVISIBLE;
+	private String name;   //文件名字
+	private String filePath;   //文件路径
+	private int imageId;    //显示的图片
+	private boolean boxChecked;   //选择框的状态（是否被选择）
+	private int boxVisible = CheckBox.INVISIBLE;   //选择框是否可见
 	
 	
 	public String getName(){

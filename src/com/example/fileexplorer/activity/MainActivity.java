@@ -8,22 +8,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.example.fileexplorer.R;
-import com.example.fileexplorer.database.FileDB;
 import com.example.fileexplorer.database.FileOpenHelper;
 import com.example.fileexplorer.file.FileAdapter;
 import com.example.fileexplorer.file.FileItem;
 import com.example.fileexplorer.util.MemoryCaculation;
 import com.example.fileexplorer.util.ZipUtil;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ProgressDialog;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -33,12 +27,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
@@ -47,12 +37,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.ListView;
@@ -66,27 +52,27 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements OnClickListener{
 	
 	
-	public static List<FileItem> fileList ;
-	public static List<List> catalogIndex = new ArrayList<List>();
-	public static  String rootPath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-	public static MemoryCaculation memoryCaculation = new MemoryCaculation();
-	public static boolean isMulChoice = false;  //是否多选
+	public static List<FileItem> fileList ;  //用于储存当前目录下各文件的相关数据
+	public static List<List> catalogIndex = new ArrayList<List>();   //用于储存当前以及之前的目录
+	public static  String rootPath =Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;  //根目录
+	public static MemoryCaculation memoryCaculation = new MemoryCaculation();   //关于计算储存空间的类
+	public static boolean isMulChoice = false;  //是否多选（各项选择框）
 	public static TableLayout optionLayout;  //文件操作功能框架
 	public static TextView fileselectedNumber;    //显示选中的数量
 	public static ListView listView;     //文件列表
-	public static String currentPath ;
-	public static File[] files;
+	public static String currentPath ;   //当前路径
+	public static File[] files;    //当前目录下的文件数组
 	public  List< Map<String, String> > totalFileList = new ArrayList< Map<String, String> >();
-	public Button moreFunction;
-	public PopupWindow popupWindow;
-	public int flag = 0;   //用于在粘贴前一操作是复制还是剪切
+	public Button moreFunction;       //更多功能的触发按钮
+	public PopupWindow popupWindow;    //置顶功能框
+	public int flag = 0;   //用于判断在粘贴前一操作是复制还是剪切
 	public int mark = 0;   //用于在Back前判断关闭文件
 	public  FileOpenHelper dbHelper = new FileOpenHelper(this,"File.db",null,1);
-	public static SQLiteDatabase db;
-	public static int progress = 0;
-	public TextView memoryAvailable;
-	public TextView memoryAll;
-	public ProgressBar progressBar;
+	public static SQLiteDatabase db;   //储存文件信息的数据库
+	public static int progress = 0;    //标识符，用于标志数据是否完全导入到数据库里
+	public TextView memoryAvailable;   //可用储存空间
+	public TextView memoryAll;        //全部储存空间
+	public ProgressBar progressBar;   //储存空间进度条
 
 	
 
@@ -95,58 +81,55 @@ public class MainActivity extends Activity implements OnClickListener{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main);
+		/*
+		 * 将当前手机内存界面上面的标题中的“手机”的颜色设置为橙色
+		 */
 		TextView catalogFile = (TextView)findViewById(R.id.catalog_file);
 		catalogFile.setTextColor(0xFFFF8C00);
 		TextView classifyFile = (TextView)findViewById(R.id.classify_file);
 		classifyFile.setTextColor(0xFF000000);
 		
-		
-
-		
-		
 		currentPath= Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-		
+		/*
+		 * 将有关文件的数据导入到数据库里
+		 */
 		db = dbHelper.getWritableDatabase();
 		Cursor myCursor = db.rawQuery("select * from File", null);
-		if(myCursor.getCount() == 0){
+		if(myCursor.getCount() == 0){     //判断数据库是否为空
 			new Thread(new Runnable(){
 				public void run(){
 					
-					db.beginTransaction();
+					db.beginTransaction();  //开启事务，保证数据完全导入到数据库里
 					try{
 						saveFile(rootPath);
 						db.setTransactionSuccessful();   //事务已经执行成功
 					}catch(Exception e){
 						e.printStackTrace();
 					}finally{
-						progress = 1;
+						progress = 1;     //数据完全导入，将progress置为1
 						db.endTransaction();
 					}
 			}
 		}).start();
 	}else{
-		progress = 1;
+		progress = 1;   //数据早已导入，将progress置为1
 	}
 	
 		
 		
 		
-		
-		
-		
-		
-	
-	
-		
-		
-		//显示文件列表
+		/*
+		 * 显示文件列表
+		 */
 		initView(currentPath);
 		FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
 		listView = (ListView)findViewById(R.id.list_view);
 		listView.setAdapter(adapter);
 		
 		
-		//功能按钮注册监听事件
+		/*
+		 * 功能按钮注册监听事件
+		 */
 		Button renameFile = (Button)findViewById(R.id.rename_file);
 		renameFile.setOnClickListener(this);
 		Button deleteFile = (Button)findViewById(R.id.delete_file);
@@ -159,8 +142,9 @@ public class MainActivity extends Activity implements OnClickListener{
 		encryptFile.setOnClickListener(this);
 		
 		
-		
-		//搜索界面跳换
+		/*
+		 * 搜索界面跳换
+		 */
 		EditText searchMessage = (EditText)findViewById(R.id.search_message);
 		searchMessage.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
@@ -171,11 +155,12 @@ public class MainActivity extends Activity implements OnClickListener{
 		});
 		
 		
-		//点击“分类”，进入到文件分类界面
-		
+		/*
+		 * 点击“分类”，进入到文件分类界面
+		 */
 		classifyFile.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
-				if(progress == 0){
+				if(progress == 0){    //数据还未完全加载到数据库中
 					ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
 					progressDialog.setTitle("正在加载数据....");
 					progressDialog.setMessage("请稍后再");
@@ -189,15 +174,21 @@ public class MainActivity extends Activity implements OnClickListener{
 		});
 		
 		
-		
+		/*
+		 * “更加功能”按钮注册监听事件
+		 */
 		Button moreFunction = (Button)findViewById(R.id.more_function);
 		moreFunction.setOnClickListener(this);
 		
-		//文件操作功能选择框架
+		/*
+		 * 文件操作功能选择框架
+		 */
 		optionLayout = (TableLayout)findViewById(R.id.function_option);
 		fileselectedNumber = (TextView)findViewById(R.id.fileselected_number);
 
-		//显示存储情况
+		/*
+		 * 显示存储情况
+		 */
 		memoryAvailable = (TextView)findViewById(R.id.memory_available);
 		memoryAll = (TextView)findViewById(R.id.memory_all);
 		ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
@@ -209,7 +200,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	}
 	
 	
-	
+	/*
+	 * 更新存储空间的数据（在删除、复制、压缩、解压等操作后）
+	 */
 	public void updateMemory(){
 		memoryAvailable = (TextView)findViewById(R.id.memory_available);
 		memoryAll = (TextView)findViewById(R.id.memory_all);
@@ -221,9 +214,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	}
 
 	
-	
-	
-	
+	/*
+	 * 将有关文件的数据存储到数据库中
+	 */
 	public void saveFile(String path){
 		File[] totalFile = new File(path).listFiles();
 		if(totalFile == null)
@@ -243,7 +236,9 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	}
 	
-	
+	/*
+	 * 将某一路径下的文件移出数据库
+	 */
 	public void removelFileFromDB(String path){
 			File[] totalFile = new File(path).listFiles();
 			if(totalFile == null || totalFile.length == 0)
@@ -258,7 +253,9 @@ public class MainActivity extends Activity implements OnClickListener{
 			}
 	}
 	
-	
+	/*
+	 *  将某一路径下的文件添加到数据库
+	 */
 	public void addlFileToDB(String path){
 		File[] totalFile = new File(path).listFiles();
 		if(totalFile == null || totalFile.length == 0)
@@ -275,9 +272,11 @@ public class MainActivity extends Activity implements OnClickListener{
 				addlFileToDB(file.getAbsolutePath());
 			}	
 		}
-}
+	}
 	
-	
+	/*
+	 * 初始化当前目录下文件的数据
+	 */
 	public static void initView(String filePath){
 			List<FileItem> list = new ArrayList<FileItem>();
 			File folder =new File(filePath);
@@ -323,30 +322,14 @@ public class MainActivity extends Activity implements OnClickListener{
 			fileList = list;
 	}
 	
+		
 	
-	/*public static void initView(String filePath){
-		List<FileItem> list = new ArrayList<FileItem>();
-		File folder =new File(filePath);
-		files = folder.listFiles();
-		for(File file : files){
-			FileItem fileItem = new FileItem();
-			fileItem.setName(file.getName());
-			fileItem.setfilePath(file.getAbsolutePath());
-			fileItem.setImageId(R.drawable.file);
-			fileItem.setImageId(R.drawable.file);
-			list.add(fileItem);	
-		}
-		catalogIndex.add(list);
-		fileList = list;
-	}*/
-	
-	
-	
-	
-	//功能点击事件，对选中的文件进行操作
+	/*
+	 * 功能点击事件，对选中的文件进行操作
+	 */
 	 public void onClick(View v) {
 		 switch (v.getId()) {
-		 case R.id.rename_file:
+		 case R.id.rename_file:    //重命名
 			 if(FileAdapter.fileSelected.size() == 0){
 					Toast.makeText(MainActivity.this,"请选择需要重命名的文件进行重命名",Toast.LENGTH_SHORT).show();
 				}else{
@@ -358,10 +341,10 @@ public class MainActivity extends Activity implements OnClickListener{
 				 		TextView editTip1 = (TextView)view1.findViewById(R.id.edit_tip);
 				 		editTip1.setText("请输入新文件名");
 				 		final EditText editContent = (EditText)view1.findViewById(R.id.edit_content);
-				 		if((new File(FileAdapter.fileSelected.get(0).getfilePath())).isFile()){
+				 		if((new File(FileAdapter.fileSelected.get(0).getfilePath())).isFile()){  //文件重命名，补上文件后缀
 				 			String type = FileAdapter.fileSelected.get(0).getName();
 				 			editContent.setText(type.substring(type.lastIndexOf(".")).toLowerCase());
-				 			editContent.setSelection(0);  
+				 			editContent.setSelection(0);  //光标定在最前面
 				 		}
 				 		dialog1.setView(view1);
 				 		dialog1.setCancelable(false);
@@ -374,9 +357,9 @@ public class MainActivity extends Activity implements OnClickListener{
 						    if(!newFile.exists() && !TextUtils.isEmpty(fileName)){				    	
 						    	for(File file : files){
 						  			if(file.getName().equals(((FileItem)FileAdapter.fileSelected.get(0)).getName())){
-						  				file.renameTo(newFile);
+						  				file.renameTo(newFile);   //重命名
 						  				fileList.get(fileList.indexOf((FileItem)FileAdapter.fileSelected.get(0))).setName(fileName);
-						  				if(newFile.isFile()){
+						  				if(newFile.isFile()){   //更新数据库中相应的文件信息
 						  					ContentValues values = new ContentValues();
 							  				values.put("name",fileName);
 							  				values.put("path", currentPath +  fileName);
@@ -420,7 +403,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				    } 
 				}
 		 		break;
-		 case R.id.delete_file:
+		 case R.id.delete_file:  //删除
 		 		isMulChoice = false;
 		 		File folder =new File(currentPath);
 		 		files = folder.listFiles();
@@ -435,11 +418,11 @@ public class MainActivity extends Activity implements OnClickListener{
 						for(FileItem fileSelected: FileAdapter.fileSelected){
 						  	for(File file : files){
 						  		if(file.getName().equals(fileSelected.getName())){
-						  			deleteFile(file);
+						  			deleteFile(file);   //删除文件
 						  			fileList.remove(fileSelected);
 						  			SharedPreferences pref = getSharedPreferences(fileSelected.getName(),MODE_PRIVATE);
 						  			String filePath = pref.getString("file","");
-									if(filePath.equals(fileSelected.getfilePath())) 
+									if(filePath.equals(fileSelected.getfilePath()))   //若为加密文件，删除加密时保存的所有信息
 											pref.edit().clear().commit(); 
 						  		}				  		
 						  	}   
@@ -468,7 +451,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		 		dialog.show();
 		 	break;
 		
-		case R.id.new_file:
+		case R.id.new_file:  //新建
 	 		isMulChoice = false;
 	 		AlertDialog.Builder dialog0 = new AlertDialog.Builder(MainActivity.this);
 	 		dialog0.setTitle("新建文件夹");
@@ -484,14 +467,13 @@ public class MainActivity extends Activity implements OnClickListener{
 					EditText editContent = (EditText)view.findViewById(R.id.edit_content);
 				    String fileName = editContent.getText().toString();
 				    File newFile = new File(currentPath + fileName  + File.separator);  //实例化File
-				    if (!newFile.exists() && !TextUtils.isEmpty(fileName)) {
+				    if (!newFile.exists() && !TextUtils.isEmpty(fileName)) {   //文件夹不存在且文件夹名不为空
 				    	newFile.mkdir();    //创建文件夹
 				    	FileItem fileItem = new FileItem();
 						fileItem.setImageId(R.drawable.file);
 						fileItem.setName(fileName);
 						fileItem.setfilePath(currentPath + fileName  + File.separator);
-						fileList.add(0,fileItem);
-						Log.d("newfile",newFile.getAbsolutePath());
+						fileList.add(0,fileItem);    //放在列表第一位
 	                }else
 	                	Toast.makeText(MainActivity.this,"创建不成功，请重新输入正确、不重复的文件名",Toast.LENGTH_SHORT).show();
 					FileAdapter.fileSelected.clear();
@@ -518,39 +500,21 @@ public class MainActivity extends Activity implements OnClickListener{
 	 		dialog0.show();
 	 		break; 	
 		 		
-		case R.id.sortup_file:	
-	 		//排序 
+		case R.id.sortup_file:	//排序 （升序）
 	        Collections.sort(fileList,new Comparator<FileItem>(){ 
 	            public int compare(FileItem arg0, FileItem arg1) {
 	            	if(arg0.getName().charAt(0) == arg1.getName().charAt(0) + 32
-	            	|| arg1.getName().charAt(0) == arg0.getName().charAt(0) + 32){
+	            	|| arg1.getName().charAt(0) == arg0.getName().charAt(0) + 32){  //大小写之间的排序
 	            		return arg0.getName().compareTo(arg1.getName());
 	            	}else{
 	            		String str0 = arg0.getName().toLowerCase();
 		            	String str1 = arg1.getName().toLowerCase();
-	            		if(str0.getBytes().length == str0.length()&& str1.getBytes().length == str1.length()){            			
+	            		if(str0.getBytes().length == str0.length()&& str1.getBytes().length == str1.length()){  //不同字母间的排序          			
 			            	return str0.compareTo(str1);
-	            		}else if(str0.getBytes().length != str0.length()&& str1.getBytes().length != str1.length()){
+	            		}else if(str0.getBytes().length != str0.length()&& str1.getBytes().length != str1.length()){  //不同汉字间的排序
 			            	return str1.compareTo(str0);
-	            		}else
+	            		}else  //汉字和字母间的排序
 	            			return str0.compareTo(str1);
-	            		
-	            		
-	            		
-	            		
-	            		
-	            		
-	            		/*if(arg0.getName().getBytes().length == arg0.getName().length()&& 
-	            				arg1.getName().getBytes().length == arg1.getName().length()){
-	            			String str0 = arg0.getName().toLowerCase();
-			            	String str1 = arg1.getName().toLowerCase();
-			            	return str0.compareTo(str1);
-	            		}else if(arg0.getName().getBytes().length == arg0.getName().length()&& 
-	            				arg1.getName().getBytes().length == arg1.getName().length()){
-	            			String str0 = arg0.getName().toLowerCase();
-			            	String str1 = arg1.getName().toLowerCase();
-			            	return str0.compareTo(str1);
-	            		}*/
 	            		
 	            	}	
 	             }
@@ -560,7 +524,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		    popupWindow.dismiss(); 
 	 		break; 		
 		 	
-		case R.id.sortdown_file:
+		case R.id.sortdown_file:   //排序（降序）
 			Collections.sort(fileList,new Comparator<FileItem>(){ 
 	            public int compare(FileItem arg0, FileItem arg1) {
 	            	if(arg0.getName().charAt(0) == arg1.getName().charAt(0) + 32
@@ -578,31 +542,29 @@ public class MainActivity extends Activity implements OnClickListener{
 	            	}	
 	             } 
 	        });
-	 		/*Collections.reverse(fileList);*/
 	 		FileAdapter adapter1 = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
 			listView.setAdapter(adapter1);
 			popupWindow.dismiss(); 
 	 		break; 	
 	 		
 	
-		case R.id.more_function:
+		case R.id.more_function:   //触发更多功能事件，置顶窗口出现
 			View v1 = LayoutInflater.from(this).inflate(R.layout.activity_main,null);
 			showPopupWindow(v1);
 			break;
 		
-		case  R.id.copy_file:
-			flag = 0;
+		case  R.id.copy_file:  //复制
+			flag = 0;    //0标识为复制
 			isMulChoice = false;
 		    for(int i=0;i<fileList.size();i++){
 		    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
 		    }
 		    optionLayout.setVisibility(View.GONE);
-		    fileselectedNumber.setVisibility(View.GONE);
-		    
+		    fileselectedNumber.setVisibility(View.GONE);   
 			break;
 			
-		case R.id.crop_file:
-			flag = 1;
+		case R.id.crop_file:  //剪切
+			flag = 1;  //1标识为剪切
 			isMulChoice = false;
 			for(FileItem fileSelected: FileAdapter.fileSelected)
 			  	fileList.remove(fileSelected);				  		
@@ -613,11 +575,11 @@ public class MainActivity extends Activity implements OnClickListener{
 			break;
 		
 					
-		case R.id.paste_file:
+		case R.id.paste_file:  //粘贴
 			if(FileAdapter.fileSelected.size() == 0){
 				Toast.makeText(MainActivity.this,"操作错误，未选择文件进行操作",Toast.LENGTH_SHORT).show();
 			}else{
-				for(FileItem fileSelected: FileAdapter.fileSelected){
+				for(FileItem fileSelected: FileAdapter.fileSelected){  //文件夹
 					if( (new File(fileSelected.getfilePath())).isDirectory()){
 						copyFolder(fileSelected.getfilePath(),currentPath +  (fileSelected.getName()).toString(),fileSelected.getName());
 						FileItem fileItem = new FileItem();
@@ -627,7 +589,7 @@ public class MainActivity extends Activity implements OnClickListener{
 						fileList.add(0,fileItem);
 					}
 						
-					if((new File(fileSelected.getfilePath())).isFile()){
+					if((new File(fileSelected.getfilePath())).isFile()){   //文件
 						copyFile(fileSelected.getfilePath(),currentPath +  (fileSelected.getName()).toString());
 						FileItem fileItem = new FileItem();
 						String fileType = FileAdapter.getMIMEType(new File(fileSelected.getfilePath()));
@@ -662,24 +624,33 @@ public class MainActivity extends Activity implements OnClickListener{
 						fileList.add(0,fileItem);	
 					}		
 				}
-				if(flag == 1){
+				if(flag == 1){  //前一操作为剪切，删除原来的文件
 					for(FileItem fileSelected: FileAdapter.fileSelected){
 					  	File targetFile = new File(fileSelected.getfilePath());
 					  	deleteFile(targetFile);			  		  
 					} 	
 				}
-				Log.d("selest",FileAdapter.fileSelected.get(0).getfilePath());
 				FileAdapter adapter4 = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
 			    listView.setAdapter(adapter4);
 			    FileAdapter.fileSelected.clear();
 			    popupWindow.dismiss(); 
-			    updateMemory();
+			    updateMemory();   //更新存储空间的数据
 			}	
 			break; 
-		case R.id.zip_file:
+		case R.id.zip_file:   //压缩
 			if(FileAdapter.fileSelected.size() == 0){
 				Toast.makeText(MainActivity.this,"请选择需要压缩的文件再进行压缩",Toast.LENGTH_SHORT).show();
-			}else{
+			}else if(FileAdapter.fileSelected.size() > 1){
+				Toast.makeText(MainActivity.this,"不可同时对多个文件夹进行压缩",Toast.LENGTH_SHORT).show();
+				isMulChoice = false;
+				FileAdapter.fileSelected.clear();
+			    for(int i=0;i<fileList.size();i++){
+			    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
+			    }
+			    optionLayout.setVisibility(View.GONE);
+			    fileselectedNumber.setVisibility(View.GONE);
+			}
+			else if(FileAdapter.fileSelected.size() == 1){
 				isMulChoice = false;
 		 		AlertDialog.Builder dialog4 = new AlertDialog.Builder(MainActivity.this);
 		 		dialog4.setTitle("压缩");
@@ -700,12 +671,14 @@ public class MainActivity extends Activity implements OnClickListener{
 					    	FileItem selectedFileItem = (FileItem)FileAdapter.fileSelected.get(0);
 						    try{
 						    	ZipUtil.zipFile(selectedFileItem.getfilePath(),currentPath + fileName);
+						    	/*
+						    	 * 将生成的Zip文件信息添加到数据库中
+						    	 */
 						    	ContentValues values = new ContentValues();
 				                values.put("name", fileName);
 				                values.put("path",currentPath + fileName);
 				                values.put("type","zip");
 				                db.insert("File",null,values);
-						    	Log.e("function","zip file");
 						    	}catch(Exception e){
 						    		 e.printStackTrace(); 
 						    	}
@@ -740,73 +713,102 @@ public class MainActivity extends Activity implements OnClickListener{
 					}
 				});
 		 		dialog4.show();
-			}
-			
+			}		
 	 		break; 	
-		case R.id.unzip_file:
+		case R.id.unzip_file:   //解压
 			if(FileAdapter.fileSelected.size() == 0){
 				Toast.makeText(MainActivity.this,"请选择需要解压的文件再进行解压",Toast.LENGTH_SHORT).show();
-			}else{
+			}else if(FileAdapter.fileSelected.size() > 1 ){
+				Toast.makeText(MainActivity.this,"不可同时对多个文件夹解压",Toast.LENGTH_SHORT).show();
 				isMulChoice = false;
-		 		AlertDialog.Builder dialog5 = new AlertDialog.Builder(MainActivity.this);
-		 		dialog5.setTitle("解压");
-		 		final View view5 = LayoutInflater.from(this).inflate(R.layout.defined_dialog, null); 
-		 		TextView editTip5 = (TextView)view5.findViewById(R.id.edit_tip);
-		 		editTip5.setText("解压到");
-		 		dialog5.setView(view5);
-		 		dialog5.setCancelable(false);
-		 		dialog5.setPositiveButton("确定",new DialogInterface.OnClickListener() {
+				FileAdapter.fileSelected.clear();
+			    for(int i=0;i<fileList.size();i++){
+			    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
+			    }
+			    optionLayout.setVisibility(View.GONE);
+			    fileselectedNumber.setVisibility(View.GONE);
+			}else if(FileAdapter.fileSelected.size() == 1){
+				if(FileAdapter.fileSelected.get(0).getName().indexOf(".zip") > -1){
+					isMulChoice = false;
+			 		AlertDialog.Builder dialog5 = new AlertDialog.Builder(MainActivity.this);
+			 		dialog5.setTitle("解压");
+			 		final View view5 = LayoutInflater.from(this).inflate(R.layout.defined_dialog, null); 
+			 		TextView editTip5 = (TextView)view5.findViewById(R.id.edit_tip);
+			 		editTip5.setText("解压到");
+			 		dialog5.setView(view5);
+			 		dialog5.setCancelable(false);
+			 		dialog5.setPositiveButton("确定",new DialogInterface.OnClickListener() {
+						
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							EditText editContent = (EditText)view5.findViewById(R.id.edit_content);
+						    String fileName = editContent.getText().toString();
+						    if (!(new File(currentPath + fileName).exists()) && !TextUtils.isEmpty(fileName)){
+						    	FileItem selectedFileItem = FileAdapter.fileSelected.get(0);
+							    try{
+							    	ZipUtil.unZipFile(selectedFileItem.getfilePath(),currentPath + fileName);
+							    	addlFileToDB(currentPath + fileName);
+							    	}catch(Exception e){
+							    		 e.printStackTrace(); 
+							    	}
+							    FileItem fileItem = new FileItem();
+								fileItem.setImageId(R.drawable.file);
+								fileItem.setName(fileName);
+								fileItem.setfilePath(currentPath + fileName);
+								fileList.add(0,fileItem);
+						    }else{
+						    	Toast.makeText(MainActivity.this,"解压不成功，请重新输入正确、不重复的文件名",Toast.LENGTH_SHORT).show();
+						    }			    
+							FileAdapter.fileSelected.clear();
+							FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
+						    listView.setAdapter(adapter);
+						    optionLayout.setVisibility(View.GONE);
+						    fileselectedNumber.setVisibility(View.GONE);
+						    popupWindow.dismiss(); 
+						    updateMemory();
+						}
+					} );
+			 		dialog5.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+						
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							FileAdapter.fileSelected.clear();
+							FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,fileList);
+						    listView.setAdapter(adapter);
+						    optionLayout.setVisibility(View.GONE);
+						    fileselectedNumber.setVisibility(View.GONE);
+						    popupWindow.dismiss(); 
+						}
+					});
+			 		dialog5.show();
+				}else{
+					Toast.makeText(MainActivity.this,"只能对ZIP格式的文件进行解压",Toast.LENGTH_SHORT).show();	
+					isMulChoice = false;
+					FileAdapter.fileSelected.clear();
+				    for(int i=0;i<fileList.size();i++){
+				    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
+				    }
+				    optionLayout.setVisibility(View.GONE);
+				    fileselectedNumber.setVisibility(View.GONE);
+				}
 					
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						Log.d("function","delete file");
-						EditText editContent = (EditText)view5.findViewById(R.id.edit_content);
-					    String fileName = editContent.getText().toString();
-					    if (!(new File(currentPath + fileName).exists()) && !TextUtils.isEmpty(fileName)){
-					    	FileItem selectedFileItem = FileAdapter.fileSelected.get(0);
-						    try{
-						    	ZipUtil.unZipFile(selectedFileItem.getfilePath(),currentPath + fileName);
-						    	addlFileToDB(currentPath + fileName);
-						    	}catch(Exception e){
-						    		 e.printStackTrace(); 
-						    	}
-						    FileItem fileItem = new FileItem();
-							fileItem.setImageId(R.drawable.file);
-							fileItem.setName(fileName);
-							fileItem.setfilePath(currentPath + fileName);
-							fileList.add(0,fileItem);
-					    }else{
-					    	Toast.makeText(MainActivity.this,"解压不成功，请重新输入正确、不重复的文件名",Toast.LENGTH_SHORT).show();
-					    }			    
-						FileAdapter.fileSelected.clear();
-						FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,catalogIndex.get(catalogIndex.size()-1));
-					    listView.setAdapter(adapter);
-					    optionLayout.setVisibility(View.GONE);
-					    fileselectedNumber.setVisibility(View.GONE);
-					    popupWindow.dismiss(); 
-					    updateMemory();
-					}
-				} );
-		 		dialog5.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-					
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						FileAdapter.fileSelected.clear();
-						FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,fileList);
-					    listView.setAdapter(adapter);
-					    optionLayout.setVisibility(View.GONE);
-					    fileselectedNumber.setVisibility(View.GONE);
-					    popupWindow.dismiss(); 
-					}
-				});
-		 		dialog5.show();
+				
 			}
 	 		break; 	
 			
-		case R.id.encrypt_file:
+		case R.id.encrypt_file:  //加密
 			if(FileAdapter.fileSelected.size() == 0){
 				Toast.makeText(MainActivity.this,"请选择需要加密的文件进行加密",Toast.LENGTH_SHORT).show();
-			}else{
+			}else if(FileAdapter.fileSelected.size() > 1){
+				Toast.makeText(MainActivity.this,"不可同时对多个文件加密",Toast.LENGTH_SHORT).show();
+				isMulChoice = false;
+				FileAdapter.fileSelected.clear();
+			    for(int i=0;i<fileList.size();i++){
+			    	fileList.get(i).setboxVisible(CheckBox.INVISIBLE);
+			    }
+			    optionLayout.setVisibility(View.GONE);
+			    fileselectedNumber.setVisibility(View.GONE);
+			}else if(FileAdapter.fileSelected.size() == 1){
 				isMulChoice = false;
 		 		AlertDialog.Builder dialog6 = new AlertDialog.Builder(MainActivity.this);
 		 		dialog6.setTitle("设置为私密文件");
@@ -814,7 +816,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		 		TextView editTip6 = (TextView)view6.findViewById(R.id.edit_tip);
 		 		editTip6.setText("请输入密码");
 		 		final EditText editContent1 = (EditText)view6.findViewById(R.id.edit_content);
-		 		editContent1.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		 		editContent1.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);  //输入内容为不可见
 		 		dialog6.setView(view6);
 		 		dialog6.setCancelable(false);
 		 		dialog6.setPositiveButton("确定",new DialogInterface.OnClickListener() {
@@ -822,18 +824,20 @@ public class MainActivity extends Activity implements OnClickListener{
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO Auto-generated method stub			
 					    String password = editContent1.getText().toString();
-					    if (!password.equals("")){
+					    if (!password.equals("")){  //密码不为空，将密码保存起来
 					    	SharedPreferences.Editor editor = getSharedPreferences(FileAdapter.fileSelected.get(0).getName(),MODE_PRIVATE).edit();
 					    	editor.putString("file",FileAdapter.fileSelected.get(0).getfilePath());
 							editor.putString("password", password);
 							editor.commit();
+							/*
+							 * 在数据库中移出加密的文件
+							 */
 							if((new File(FileAdapter.fileSelected.get(0).getfilePath())).isFile()){
 								db.delete("File", "path = ?",  new String[]{FileAdapter.fileSelected.get(0).getfilePath()});
 							}else
 								removelFileFromDB(FileAdapter.fileSelected.get(0).getfilePath());
-							
-							Log.d("file",FileAdapter.fileSelected.get(0).getName());
-							Toast.makeText(MainActivity.this,"设置成功!",Toast.LENGTH_SHORT).show();
+				
+							Toast.makeText(MainActivity.this,"设置成功!不要随意更改加密文件的路径",Toast.LENGTH_SHORT).show();
 					    }else{
 					    	Toast.makeText(MainActivity.this,"密码不能为空!",Toast.LENGTH_SHORT).show();
 					    }
@@ -860,10 +864,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				});
 		 		dialog6.show();
 			}
-	 		break; 	
-	 		
-	 		
-	 		
+	 		break; 		 		
 		default:
         	break; 		
 	        
@@ -873,40 +874,22 @@ public class MainActivity extends Activity implements OnClickListener{
 	
 		 
 
- public void showPopupWindow(View view) {
+	 public void showPopupWindow(View view) {
 	        // 一个自定义的布局，作为显示的内容
-	        View contentView = LayoutInflater.from(this).inflate(
-	                R.layout.pop_window, null);
+	        View contentView = LayoutInflater.from(this).inflate( R.layout.pop_window, null);
 	        popupWindow = new PopupWindow(contentView,
 	        		LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
-	        popupWindow.setTouchable(true);
-	        // 使其聚集  
-	        popupWindow.setFocusable(true);  
-	        // 设置允许在外点击消失  
-	        popupWindow.setOutsideTouchable(true);  
+	        popupWindow.setTouchable(true);   
+	        popupWindow.setFocusable(true);   // 使其聚集  
+	        popupWindow.setOutsideTouchable(true);   // 设置允许在外点击消失  
 	        // 这个是为了点击“返回Back”也能使其消失，并且并不会影响你的背景  
 	        popupWindow.setBackgroundDrawable(new BitmapDrawable());      
-	   /* popupWindow.setTouchInterceptor(new OnTouchListener()  {
-
-	            @Override
-	            public boolean onTouch(View v, MotionEvent event) {
-					if (popupWindow != null && popupWindow.isShowing()) { 
-						popupWindow.dismiss(); 
-						popupWindow = null; 
-					}
-	                return false;
-	                // 这里如果返回true的话，touch事件将被拦截
-	                // 拦截后 PopupWindow的onTouchEvent不被调用，这样点击外部区域无法dismiss
-	            }
-	        });*/
 
 	        // 如果不设置PopupWindow的背景，无论是点击外部区域还是Back键都无法dismiss弹框
 	        // 我觉得这里是API的一个bug
 	        popupWindow.setBackgroundDrawable(getResources().getDrawable(
 	                R.drawable.ppt)); 
-
-	        // 设置好参数之后再show
-	       	popupWindow.showAtLocation(view, Gravity.TOP, 0, 0);  
+	       	popupWindow.showAtLocation(view, Gravity.TOP, 0, 0);      // 设置好参数之后再show
 	        TextView newFile = (TextView)contentView.findViewById(R.id.new_file);
 	        newFile.setOnClickListener(this);
 	        TextView pasteFile = (TextView)contentView.findViewById(R.id.paste_file);
@@ -918,12 +901,13 @@ public class MainActivity extends Activity implements OnClickListener{
 			TextView zipFile = (TextView)contentView.findViewById(R.id.zip_file);
 			zipFile.setOnClickListener(this);
 			TextView unzipFile = (TextView)contentView.findViewById(R.id.unzip_file);
-			unzipFile.setOnClickListener(this);
-			
+			unzipFile.setOnClickListener(this);			
 
 	    }
 
-	 
+	 /*
+	  * 删除文件
+	  */
 	 public void deleteFile(File file){
 		if(file.isFile()){
 			file.delete();
@@ -931,8 +915,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		}else{			
 			File[] childFiles = file.listFiles();			
 		    if (childFiles == null || childFiles.length == 0) {  
-		          file.delete();
-		          
+		          file.delete();	          
 		     }else{
 		    	 for (int i = 0; i < childFiles.length; i++) {  		      
 		    		 deleteFile(childFiles[i]);  
@@ -942,9 +925,9 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 	 }
 	 
-	 
-	 
-	 
+	 /*
+	  * 复制文件
+	  */
 	 public void copyFile(String oldPath, String newPath) {   
 		 try {   
 	         int byteSum = 0;   
@@ -973,7 +956,9 @@ public class MainActivity extends Activity implements OnClickListener{
 	     }   
    }   
 
-	 
+	 /*
+	  * 复制文件夹
+	  */
 	 public void copyFolder(String oldPath, String newPath,String folderName) {   
 		 try {  
 			 (new File(newPath)).mkdirs();    //建立新文件夹目录   
@@ -988,8 +973,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	                   String path1=oldPath + File.separator + file[i].getName();  // 准备复制的源文件夹 
 	                   String path2=newPath + File.separator + file[i].getName();   // 准备复制的目标文件夹   
 	                   copyFolder(path1, path2,file[i].getName());  
-	                }  
-	               
+	                }      
 	          } 
 	   } catch (Exception e) {   
 		   	Toast.makeText(this, "复制文件夹操作出错", Toast.LENGTH_SHORT).show();   
@@ -997,33 +981,12 @@ public class MainActivity extends Activity implements OnClickListener{
 	      }   
     }  
 
-
 	 
-	 
-	 protected void onActivityResult(int requestCode,int resultCode,Intent data){
-		 switch(requestCode){
-		 case 1:
-			 mark = 1;
-			 ActivityManager manager = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
-			 List<RunningTaskInfo> runningTaskInfos = manager.getRunningTasks(1) ;
-			 String a = (runningTaskInfos.get(0).topActivity).toString() ;
-			 Log.d("debug",a);
-			 break;
-		default:
-		 }
-	 }
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 public void onBackPressed(){
-		 
-		 
-		 if(isMulChoice == true){
+	 /*
+	  * 返回事件
+	  */
+	 public void onBackPressed(){	 
+		 if(isMulChoice == true){   //各项选择框出现的情况下，返回让其消失
 			 isMulChoice = false;
 			 FileAdapter.fileSelected.clear();
 			    for(int i=0;i<fileList.size();i++){
@@ -1031,34 +994,23 @@ public class MainActivity extends Activity implements OnClickListener{
 			    }
 			    optionLayout.setVisibility(View.GONE);
 			    fileselectedNumber.setVisibility(View.GONE);
-		 }else{
-			 if(catalogIndex.size() > 1){
+		 }else{     //各项选择框不出现的情况下
+			 if(catalogIndex.size() > 1){   //路径不为根目录，返回到父目录
 				 catalogIndex.remove(catalogIndex.get(catalogIndex.size()-1));
 				 fileList = catalogIndex.get(catalogIndex.size()-1);
 				 FileAdapter adapter = new FileAdapter(MainActivity.this,R.layout.file_item,fileList);
 				 listView = (ListView)findViewById(R.id.list_view);
 				 listView.setAdapter(adapter);
-				 Log.e("Back",currentPath);
 				 currentPath = new File(currentPath).getParent() + File.separator;
 				 File folder =new File(currentPath);
-			 	 files = folder.listFiles(); 
-			 	
-			 }else if(catalogIndex.size() == 1){
+			 	 files = folder.listFiles(); 		 	
+			 }else if(catalogIndex.size() == 1){   //路径为根目录，返回退出
 				catalogIndex.clear();
 				 finish(); 
 			 }
-		 }
-		 
-		 
-		 	
-			 
-				 
-		 
-		
+		 }	
 		 
 	 }
 	 
 	 
-	
-
 }

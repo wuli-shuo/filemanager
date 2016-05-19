@@ -7,10 +7,7 @@
     
 
 
-    <com.example.fileexplorer.util.Title
- 	    android:layout_width="match_parent"
- 	    android:layout_height="wrap_content" 
- 	    ></com.example.fileexplorer.util.Title>
+    <include layout="@layout/title"  />
     
      
     
@@ -46,10 +43,7 @@
    
    
    
-    <com.example.fileexplorer.util.FunctionSelection
- 	    android:layout_width="match_parent"
- 	    android:layout_height="wrap_content" 
- 	    ></com.example.fileexplorer.util.FunctionSelection>
+    <include layout="@layout/function_option"  />
     
     <include layout="@layout/memory_info"  />
     

@@ -24,7 +24,9 @@ public class MemoryCaculation {
 	}
 	
 	
-	//返回表示存储空间大小的字符串
+	/*
+	 * 返回表示存储空间大小的字符串
+	 */
 	public String fileSize(float size){
 	       String str = "";
 	       if(size >= 1024){

@@ -2,14 +2,10 @@ package com.example.fileexplorer.activity;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import com.example.fileexplorer.R;
 import com.example.fileexplorer.file.FileAdapter;
 import com.example.fileexplorer.file.FileItem;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -35,10 +31,17 @@ public class AnotherActivity extends Activity implements OnClickListener{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.another_view);
+		
+		/*
+		 * 将当前分类界面上面的标题中的“分类”的颜色设置为橙色
+		 */
 		TextView catalogFile = (TextView)findViewById(R.id.catalog_file);
 		catalogFile.setTextColor(0xFF000000);
 		TextView classifyFile = (TextView)findViewById(R.id.classify_file);
 		classifyFile.setTextColor(0xFFFF8C00);
+		/*
+		 * 将当前分类界面上面的标题最右边的更多选项按钮设置为不可见
+		 */
 		Button more = (Button)findViewById(R.id.more_function);
 		more.setVisibility(View.GONE);
 		
@@ -54,6 +57,9 @@ public class AnotherActivity extends Activity implements OnClickListener{
 		ImageView video = (ImageView)findViewById(R.id.type_video);
 		ImageView other = (ImageView)findViewById(R.id.type_other);
 		
+		/*
+		 * 为各类文件图片设置点击事件监听
+		 */
 		word.setOnClickListener(this);
 		ppt.setOnClickListener(this);
 		excel.setOnClickListener(this);
@@ -70,13 +76,13 @@ public class AnotherActivity extends Activity implements OnClickListener{
 		
 		//搜索界面跳换
 		EditText searchMessage = (EditText)findViewById(R.id.search_message);
-			searchMessage.setOnClickListener(new OnClickListener(){
-				public void onClick(View v){
-					Intent intent = new Intent(AnotherActivity.this,SearchActivity.class);
-					startActivity(intent);
+		searchMessage.setOnClickListener(new OnClickListener(){
+			public void onClick(View v){
+				Intent intent = new Intent(AnotherActivity.this,SearchActivity.class);
+				startActivity(intent);
 						
-				}
-			});
+			}
+		});
 		
 		
 		
@@ -101,6 +107,9 @@ public class AnotherActivity extends Activity implements OnClickListener{
 		
 	}
 	
+	/*
+	 * 点击响应事件，从文件数据库中查询，符合类型的数据添加到sameTypeList中
+	 */
 	 public void onClick(View v) {
 		 cursor = MainActivity.db.query("File",null,null,null,null,null,null);
 		 sameTypeList.clear();
@@ -316,10 +325,7 @@ public class AnotherActivity extends Activity implements OnClickListener{
 				Intent intent11 = new Intent(AnotherActivity.this,SameTypeActivity.class);
 				intent11.putExtra("type", "Other");
 				startActivity(intent11);
-				break;		
-				
-				
-			 
+				break;								 
 		 }
 		 
 	 }
